@@ -33,6 +33,9 @@ int main(int argc, char** argv){
 		while (getline(ss, line)){
 			output_file << line << endl;
 		}
+		output_file << "(ENDINGLOOP)" << endl;
+		output_file << "@ENDINGLOOP" << endl;
+		output_file << "0;JMP" << endl;
 		output_file.close();
 	}
 

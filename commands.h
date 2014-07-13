@@ -12,4 +12,6 @@ void prog_flow_command(std::string command, std::string arg1, std::stringstream&
 
 void func_calling_command(std::string command, std::string arg1, std::string arg2, std::stringstream& ss);
 
+//returns a unique int each time it's called, useful for giving unique labels in commands
+std::string label_salt();
 #endif

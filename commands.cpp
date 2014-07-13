@@ -2,10 +2,14 @@
 #include <iostream>
 #include <sstream>
 
+
 void math_command(std::string command, std::stringstream& ss){
+	//use a salt when creating any label in a function to make it unique to that function
+	static int salt = 0;
 
 	//result = x + y;
 	if (command == "add"){
+		ss << std::endl << "//add" << std::endl;
 		//Point to stack, decrement 1, and load stack address into A
 		ss << "@SP" << std::endl;
 		ss << "AM = M - 1" << std::endl;
@@ -27,6 +31,7 @@ void math_command(std::string command, std::stringstream& ss){
 
 	//result = x - y;
 	else if (command == "sub"){
+		ss << std::endl << "//sub" << std::endl;
 		//Point to stack, decrement 1, and load stack address into A
 		ss << "@SP" << std::endl;
 		ss << "AM = M - 1" << std::endl;
@@ -49,6 +54,7 @@ void math_command(std::string command, std::stringstream& ss){
 
 	//result = (x & y); bitwise and
 	else if (command == "and"){
+		ss << std::endl << "//and" << std::endl;
 		//Point to stack, decrement 1, and load stack address into A
 		ss << "@SP" << std::endl;
 		ss << "AM = M - 1" << std::endl;
@@ -70,6 +76,7 @@ void math_command(std::string command, std::stringstream& ss){
 
 	//result = (x | y); bitwise or
 	else if (command == "or"){
+		ss << std::endl << "//or" << std::endl;
 		//Point to stack, decrement 1, and load stack address into A
 		ss << "@SP" << std::endl;
 		ss << "AM = M - 1" << std::endl;
@@ -91,6 +98,7 @@ void math_command(std::string command, std::stringstream& ss){
 
 	//result = -y;
 	else if (command == "neg"){
+		ss << std::endl << "//neg" << std::endl;
 		//Point to stack, decrement 1, and load stack address into A
 		ss << "@SP" << std::endl;
 		ss << "AM = M - 1" << std::endl;
@@ -105,6 +113,7 @@ void math_command(std::string command, std::stringstream& ss){
 
 	//result = !y
 	else if (command == "not"){
+		ss << std::endl << "//not" << std::endl;
 		//Point to stack, decrement 1, and load stack address into A
 		ss << "@SP" << std::endl;
 		ss << "AM = M - 1" << std::endl;
@@ -122,6 +131,7 @@ void math_command(std::string command, std::stringstream& ss){
 
 	//result = (x == y); (1 if equal, 0 if not)
 	else if (command == "eq"){
+		ss << std::endl << "//eq" << std::endl;
 		//Point to stack, decrement 1, and load stack address into A
 		ss << "@SP" << std::endl;
 		ss << "AM = M - 1" << std::endl;
@@ -140,22 +150,27 @@ void math_command(std::string command, std::stringstream& ss){
 		ss << "M = 0" << std::endl;
 
 		//we will use 2 labels and 2 jumps for the if/else logic; if x != y go to END, if not negate(bitwise) M to produce True
-		ss << "@EQ" << std::endl;
+		ss << "@EQ" + std::to_string(salt) << std::endl;
 		ss << "D;JEQ" << std::endl;
-		ss << "@END" << std::endl;
+		ss << "@END" + std::to_string(salt) << std::endl;
 		ss << "0;JMP" << std::endl;
 
-		ss << "(EQ)" << std::endl;
+		ss << "(EQ" << std::to_string(salt)<< ")" << std::endl;
+		ss << "@SP" << std::endl;
+		ss << "A = M" << std::endl;
 		ss << "M = !M" << std::endl;
-		ss << "(END)" << std::endl;
+		ss << "(END" << std::to_string(salt)<< ")" << std::endl;
 		
 		//return stack pointer to top of stack
 		ss << "@SP" << std::endl;
 		ss << "M = M + 1" << std::endl;
+
+		salt++;
 	}
 
 	//result = (x > y); true if x > y, else false
 	else if (command == "gt"){
+		ss << std::endl << "//gt" << std::endl;
 		//Point to stack, decrement 1, and load stack address into A
 		ss << "@SP" << std::endl;
 		ss << "AM = M - 1" << std::endl;
@@ -174,22 +189,27 @@ void math_command(std::string command, std::stringstream& ss){
 		ss << "M = 0" << std::endl;
 
 		//we will use 2 labels and 2 jumps for the if/else logic; if x > y, negate(bitwise) M to produce True, else go to END (M remains 0)
-		ss << "@GT" << std::endl;
+		ss << "@GT" + std::to_string(salt) << std::endl;
 		ss << "D;JGT" << std::endl;
-		ss << "@END" << std::endl;
+		ss << "@END" + std::to_string(salt) << std::endl;
 		ss << "0;JMP" << std::endl;
 
-		ss << "(GT)" << std::endl;
+		ss << "(GT" << std::to_string(salt)<< ")" << std::endl;
+		ss << "@SP" << std::endl;
+		ss << "A = M" << std::endl;
 		ss << "M = !M" << std::endl;
-		ss << "(END)" << std::endl;
+		ss << "(END" << std::to_string(salt) << ")" << std::endl;
 
 		//return stack pointer to top of stack
 		ss << "@SP" << std::endl;
 		ss << "M = M + 1" << std::endl;
+
+		salt++;
 	}
 
 	//result = (x < y); true if x < y, else false
 	else if (command == "lt"){
+		ss << std::endl << "//lt" << std::endl;
 		//Point to stack, decrement 1, and load stack address into A
 		ss << "@SP" << std::endl;
 		ss << "AM = M - 1" << std::endl;
@@ -208,18 +228,22 @@ void math_command(std::string command, std::stringstream& ss){
 		ss << "M = 0" << std::endl;
 
 		//we will use 2 labels and 2 jumps for the if/else logic; if x < y, negate(bitwise) M to produce True, else go to END (M remains 0)
-		ss << "@LT" << std::endl;
+		ss << "@LT" + std::to_string(salt) << std::endl;
 		ss << "D;JLT" << std::endl;
-		ss << "@END" << std::endl;
+		ss << "@END" + std::to_string(salt) << std::endl;
 		ss << "0;JMP" << std::endl;
 
-		ss << "(LT)" << std::endl;
+		ss << "(LT" << std::to_string(salt) << ")" << std::endl;
+		ss << "@SP" << std::endl;
+		ss << "A = M" << std::endl;
 		ss << "M = !M" << std::endl;
-		ss << "(END)" << std::endl;
+		ss << "(END" << std::to_string(salt) << ")" << std::endl;
 
 		//return stack pointer to top of stack
 		ss << "@SP" << std::endl;
 		ss << "M = M + 1" << std::endl;
+
+		salt++;
 	}
 	else {
 		ss << "Error arithmetic command" << std::endl;
@@ -234,12 +258,15 @@ void mem_access_command(std::string command, std::string arg1, std::string arg2,
 	if (command == "push"){
 
 		if (arg1 == "constant"){
+			ss << std::endl << "//" << "push constant " << arg2 << std::endl;
 			ss << "@" + arg2 << std::endl;
 			ss << "D = A" << std::endl;
 			ss << "@SP" << std::endl;
-			ss << "M = " << std::endl;
-			ss << "" << std::endl;
-			ss << "" << std::endl;
+			ss << "A = M" << std::endl;
+			ss << "M = D" << std::endl;
+			ss << "@SP" << std::endl;
+			ss << "M = M + 1" << std::endl;
+
 		}
 	}
 
