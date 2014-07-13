@@ -1,39 +1,68 @@
 #include <string>
 #include <iostream>
 #include <sstream>
-
+//ss << "" << std::endl;
 void math_command(std::string command, std::stringstream& ss){
 
 	//result = x + y;
 	if (command == "add"){
-		//Point to stack, pop "y" value into D
+		//Point to stack, decrement 1
 		ss << "@SP" << std::endl;
-		ss << "A - 1" << std::endl;
+		ss << "M = M - 1" << std::endl;
+
+		//load stack address in A
+		ss << "A = M" << std::endl;
+
+		//load "y" variable into D
 		ss << "D = M" << std::endl;
 
-		//Go to "x" value, replace it's value with "x + y"; exactly same effect as popping and pushing, less commands
-		ss << "A - 1" << std::endl;
+		//Point to stack, decrement by 1
+		ss << "@SP" << std::endl;
+		ss << "M = M - 1" << std::endl;
+
+		//load stack address in A
+		ss << "A = M" << std::endl;
+
+		//replace "x" with result "x+y"
 		ss << "M = M + D" << std::endl;
 
-		//return SP to top of stack
-		ss << "A + 1" << std::endl;
+		//return stack pointer to top of stack
+		ss << "@SP" << std::endl;
+		ss << "M = M + 1" << std::endl;
 	}
 	//result = x - y;
 	else if (command == "sub"){
 		
-		//Point to stack, pop "y" value into D
-		ss << "@SP" << std::endl;
-		ss << "A - 1" << std::endl;
-		ss << "D = M" << std::endl;
-
-		//Go to "x" value, replace it's value with "x - y"; exactly same effect as popping and pushing, less commands
-		ss << "A - 1" << std::endl;
-		ss << "M = M - D" << std::endl;
-
-		//return SP to top of stack
-		ss << "A + 1" << std::endl;
+		
 	}
 
+	//result = -y;
+	else if (command == "neg"){
+		
+		
+	}
+
+	//result = !y
+	else if (command == "not"){
+
+		
+	}
+
+	//result = (x & y); bitwise and
+	else if (command == "and"){
+		
+	}
+
+	//result = (x | y); bitwise or
+	else if (command == "or"){
+		
+	}
+
+	//result = (x == y); (1 if equal, 0 if not)
+	else if (command == "eq"){
+		
+		
+	}
 }
 
 
