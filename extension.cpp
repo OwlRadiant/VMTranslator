@@ -1,9 +1,11 @@
 #include <string>
 #include <vector>
+#include <sys/stat.h>
+#include <dirent.h>
 
-std::string getFileExtension(char *filename){
+std::string getFileExtension(const char *filename){
 	//check for non-NULL pointer
-	if (filename == NULL) return NULL;
+	if (filename == NULL) return "";
 
 	//since strtok modifies the parameter it's been passed, we copy *filename to a temporary buffer
 	char* buffer = new char[strlen(filename) + 1];
@@ -22,7 +24,7 @@ std::string getFileExtension(char *filename){
 		if (temp != NULL) extension = temp;
 	}
 
-	if (count <= 1) return NULL;
+	if (count <= 1) return "";
 
 	delete[] buffer;
 	return extension;
@@ -31,7 +33,7 @@ std::string getFileExtension(char *filename){
 std::string getFileName(char* filename){
 	
 	//checks correct function usage
-	if (filename == NULL) return NULL;
+	if (filename == NULL) return "";
 
 	char* buffer = new char[strlen(filename) + 1];
 	strcpy(buffer, filename);
@@ -56,4 +58,16 @@ std::string getFileName(char* filename){
 
 	delete[] buffer;
 	return result;
+}
+
+bool is_file(const char* path) {
+	struct stat buf;
+	stat(path, &buf);
+	return S_ISREG(buf.st_mode);
+}
+
+bool is_dir(const char* path) {
+	struct stat buf;
+	stat(path, &buf);
+	return S_ISDIR(buf.st_mode);
 }
