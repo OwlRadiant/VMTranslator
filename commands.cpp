@@ -1,6 +1,7 @@
 #include <string>
 #include <iostream>
 #include <sstream>
+#include "commands.h"
 
 
 void math_command(std::string command, std::stringstream& ss){
@@ -258,9 +259,147 @@ void mem_access_command(std::string command, std::string arg1, std::string arg2,
 	if (command == "push"){
 
 		if (arg1 == "constant"){
-			ss << std::endl << "//" << "push constant " << arg2 << std::endl;
+			ss << std::endl << "//push constant " << arg2 << std::endl;
 			ss << "@" + arg2 << std::endl;
 			ss << "D = A" << std::endl;
+			ss << "@SP" << std::endl;
+			ss << "A = M" << std::endl;
+			ss << "M = D" << std::endl;
+			ss << "@SP" << std::endl;
+			ss << "M = M + 1" << std::endl;
+
+		}
+		else if (arg1 == "local"){
+			ss << std::endl << "//push local " << arg2 << std::endl;
+
+			//Selects local segment LCL + arg2, stores value in D
+			ss << "@" + arg2 << std::endl;
+			ss << "D = A" << std::endl;
+			ss << "@LCL" << std::endl;
+			ss << "A = M + D" << std::endl;
+			ss << "D = M" << std::endl;
+
+			//Loads value stored in D in the stack
+			ss << "@SP" << std::endl;
+			ss << "A = M" << std::endl;
+			ss << "M = D" << std::endl;
+
+			//Increment SP
+			ss << "@SP" << std::endl;
+			ss << "M = M + 1" << std::endl;
+		}
+
+		else if (arg1 == "argument"){
+			ss << std::endl << "//push argument " << arg2 << std::endl;
+
+			//Selects argument segment ARG + arg2, stores value in D
+			ss << "@" + arg2 << std::endl;
+			ss << "D = A" << std::endl;
+			ss << "@ARG" << std::endl;
+			ss << "A = M + D" << std::endl;
+			ss << "D = M" << std::endl;
+
+			//Loads value stored in D in the stack
+			ss << "@SP" << std::endl;
+			ss << "A = M" << std::endl;
+			ss << "M = D" << std::endl;
+
+			//Increment SP
+			ss << "@SP" << std::endl;
+			ss << "M = M + 1" << std::endl;
+		}
+		else if (arg1 == "this"){
+			ss << std::endl << "//push this " << arg2 << std::endl;
+
+			//Selects segment THAT + arg2, stores value in D
+			ss << "@" + arg2 << std::endl;
+			ss << "D = A" << std::endl;
+			ss << "@THIS" << std::endl;
+			ss << "A = M + D" << std::endl;
+			ss << "D = M" << std::endl;
+
+			//Loads value stored in D in the stack
+			ss << "@SP" << std::endl;
+			ss << "A = M" << std::endl;
+			ss << "M = D" << std::endl;
+
+			//Increment SP
+			ss << "@SP" << std::endl;
+			ss << "M = M + 1" << std::endl;
+		}
+		else if (arg1 == "that"){
+			ss << std::endl << "//push that " << arg2 << std::endl;
+
+			//Selects segment THAT + arg2, stores value in D
+			ss << "@" + arg2 << std::endl;
+			ss << "D = A" << std::endl;
+			ss << "@THAT" << std::endl;
+			ss << "A = M + D" << std::endl;
+			ss << "D = M" << std::endl;
+
+			//Loads value stored in D in the stack
+			ss << "@SP" << std::endl;
+			ss << "A = M" << std::endl;
+			ss << "M = D" << std::endl;
+
+			//Increment SP
+			ss << "@SP" << std::endl;
+			ss << "M = M + 1" << std::endl;
+		}
+		else if (arg1 == "temp"){
+			ss << std::endl << "//push temp " << arg2 << std::endl;
+
+			//Selects segment temp + arg2, stores value in D
+			ss << "@" + arg2 << std::endl;
+			ss << "D = A" << std::endl;
+			ss << "@R5" << std::endl;
+			ss << "A = A + D" << std::endl;
+			ss << "D = M" << std::endl;
+
+			//Loads value stored in D in the stack
+			ss << "@SP" << std::endl;
+			ss << "A = M" << std::endl;
+			ss << "M = D" << std::endl;
+
+			//Increment SP
+			ss << "@SP" << std::endl;
+			ss << "M = M + 1" << std::endl;
+		}
+		else if (arg1 == "pointer"){
+			ss << std::endl << "//push pointer " << arg2 << std::endl;
+
+			//Selects segment pointer + arg2, stores value in D
+			ss << "@" + arg2 << std::endl;
+			ss << "D = A" << std::endl;
+			ss << "@R3" << std::endl;
+			ss << "A = A + D" << std::endl;
+			ss << "D = M" << std::endl;
+
+			//Loads value stored in D in the stack
+			ss << "@SP" << std::endl;
+			ss << "A = M" << std::endl;
+			ss << "M = D" << std::endl;
+
+			//Increment SP
+			ss << "@SP" << std::endl;
+			ss << "M = M + 1" << std::endl;
+		}
+		else if (arg1 == "static"){
+			ss << std::endl << "//push static " << arg2 << std::endl;
+
+			//This is a trickier part, I get how it's implemented but I have no seen static used yet; will come back to this to understand better
+			//Apparently static is used like a variable available to the whole file;
+				/*static: According to the Hack machine language specification, when a new symbol is encountered for the first time in an assembly program, the assembler
+				allocates a new RAM address to it, starting at address 16. This convention can be exploited to represent each static variable number j in a VM file f as the
+				assembly language symbol f.j.For example, suppose that the file Xxx.vm contains the command push static 3. This command can be translated to the Hack
+				assembly commands@Xxx.3 and D = M, followed by additional assembly code that pushes D’s value to the stack.This implementation of the static segment is
+				somewhat tricky, but it works.*/
+
+			//Get variable stored at that static address
+			ss << "@" + filename + "." + arg2 << std::endl;
+			ss << "D = M" << std::endl;
+
+			//store variable in stack
 			ss << "@SP" << std::endl;
 			ss << "A = M" << std::endl;
 			ss << "M = D" << std::endl;
@@ -272,7 +411,193 @@ void mem_access_command(std::string command, std::string arg1, std::string arg2,
 
 	//pop command
 	if (command == "pop"){
+		if (arg1 == "local"){
+			ss << std::endl << "//pop local " << arg2 << std::endl;
 
+			//Pops the highest stack variable in the D register
+			ss << "@SP" << std::endl;
+			ss << "AM = M - 1" << std::endl;
+			ss << "D = M" << std::endl;
+			
+			//Stores D in a temporary(NOT the temp segment) register
+			ss << "@R15" << std::endl;
+			ss << "M = D" << std::endl;
+
+			//Selects address to insert D at (lol) and stores it in R14 
+			ss << "@" + arg2 << std::endl;
+			ss << "D = A" << std::endl;
+			ss << "@LCL" << std::endl;
+			ss << "D = M + D" << std::endl;
+			ss << "@R14" << std::endl;
+			ss << "M = D" << std::endl;
+
+			//Retrieves D and stores it at local "arg2"
+			ss << "@R15" << std::endl;
+			ss << "D = M" << std::endl;
+			ss << "@R14" << std::endl;
+			ss << "A = M" << std::endl;
+			ss << "M = D" << std::endl;
+
+			
+			
+		}
+		else if (arg1 == "argument"){
+			ss << std::endl << "//pop argument " << arg2 << std::endl;
+
+			//Pops the highest stack variable in the D register
+			ss << "@SP" << std::endl;
+			ss << "AM = M - 1" << std::endl;
+			ss << "D = M" << std::endl;
+
+			//Stores D in a temporary(NOT the temp segment) register
+			ss << "@R15" << std::endl;
+			ss << "M = D" << std::endl;
+
+			//Selects address to insert D at (lol) and stores it in R14 
+			ss << "@" + arg2 << std::endl;
+			ss << "D = A" << std::endl;
+			ss << "@ARG" << std::endl;
+			ss << "D = M + D" << std::endl;
+			ss << "@R14" << std::endl;
+			ss << "M = D" << std::endl;
+
+			//Retrieves D and stores it at argument "arg2"
+			ss << "@R15" << std::endl;
+			ss << "D = M" << std::endl;
+			ss << "@R14" << std::endl;
+			ss << "A = M" << std::endl;
+			ss << "M = D" << std::endl;
+		}
+		else if (arg1 == "this"){
+			ss << std::endl << "//pop this " << arg2 << std::endl;
+
+			//Pops the highest stack variable in the D register
+			ss << "@SP" << std::endl;
+			ss << "AM = M - 1" << std::endl;
+			ss << "D = M" << std::endl;
+
+			//Stores D in a temporary(NOT the temp segment) register
+			ss << "@R15" << std::endl;
+			ss << "M = D" << std::endl;
+
+			//Selects address to insert D at (lol) and stores it in R14 
+			ss << "@" + arg2 << std::endl;
+			ss << "D = A" << std::endl;
+			ss << "@THIS" << std::endl;
+			ss << "D = M + D" << std::endl;
+			ss << "@R14" << std::endl;
+			ss << "M = D" << std::endl;
+
+			//Retrieves D and stores it at this "arg2"
+			ss << "@R15" << std::endl;
+			ss << "D = M" << std::endl;
+			ss << "@R14" << std::endl;
+			ss << "A = M" << std::endl;
+			ss << "M = D" << std::endl;
+
+		}
+		else if (arg1 == "that"){
+			ss << std::endl << "//pop that " << arg2 << std::endl;
+
+			//Pops the highest stack variable in the D register
+			ss << "@SP" << std::endl;
+			ss << "AM = M - 1" << std::endl;
+			ss << "D = M" << std::endl;
+
+			//Stores D in a temporary(NOT the temp segment) register
+			ss << "@R15" << std::endl;
+			ss << "M = D" << std::endl;
+
+			//Selects address to insert D at (lol) and stores it in R14 
+			ss << "@" + arg2 << std::endl;
+			ss << "D = A" << std::endl;
+			ss << "@THAT" << std::endl;
+			ss << "D = M + D" << std::endl;
+			ss << "@R14" << std::endl;
+			ss << "M = D" << std::endl;
+
+			//Retrieves D and stores it at that "arg2"
+			ss << "@R15" << std::endl;
+			ss << "D = M" << std::endl;
+			ss << "@R14" << std::endl;
+			ss << "A = M" << std::endl;
+			ss << "M = D" << std::endl;
+		}
+		else if (arg1 == "temp"){
+			ss << std::endl << "//pop temp " << arg2 << std::endl;
+
+			//Pops the highest stack variable in the D register
+			ss << "@SP" << std::endl;
+			ss << "AM = M - 1" << std::endl;
+			ss << "D = M" << std::endl;
+
+			//Stores D in a temporary(NOT the temp segment) register
+			ss << "@R15" << std::endl;
+			ss << "M = D" << std::endl;
+
+			//Selects address to insert D at (lol) and stores it in R14 
+			ss << "@" + arg2 << std::endl;
+			ss << "D = A" << std::endl;
+			ss << "@R5" << std::endl;
+			ss << "D = A + D" << std::endl;
+			ss << "@R14" << std::endl;
+			ss << "M = D" << std::endl;
+
+			//Retrieves D and stores it at temp "arg2"
+			ss << "@R15" << std::endl;
+			ss << "D = M" << std::endl;
+			ss << "@R14" << std::endl;
+			ss << "A = M" << std::endl;
+			ss << "M = D" << std::endl;
+
+			
+		}
+		else if (arg1 == "pointer"){
+			ss << std::endl << "//pop pointer " << arg2 << std::endl;
+
+			//Pops the highest stack variable in the D register
+			ss << "@SP" << std::endl;
+			ss << "AM = M - 1" << std::endl;
+			ss << "D = M" << std::endl;
+
+			//Stores D in a temporary(NOT the temp segment) register
+			ss << "@R15" << std::endl;
+			ss << "M = D" << std::endl;
+
+			//Selects address to insert D at (lol) and stores it in R14 
+			ss << "@" + arg2 << std::endl;
+			ss << "D = A" << std::endl;
+			ss << "@R3" << std::endl;
+			ss << "D = A + D" << std::endl;
+			ss << "@R14" << std::endl;
+			ss << "M = D" << std::endl;
+
+			//Retrieves D and stores it at pointer "arg2"
+			ss << "@R15" << std::endl;
+			ss << "D = M" << std::endl;
+			ss << "@R14" << std::endl;
+			ss << "A = M" << std::endl;
+			ss << "M = D" << std::endl;
+		}
+		else if (arg1 == "static"){
+			ss << std::endl << "//pop static " << arg2 << std::endl;
+			//This is a trickier part, I get how it's implemented but I have no seen static used yet; will come back to this to understand better
+			//Apparently static is used like a variable available to the whole file;
+			/*static: According to the Hack machine language specification, when a new symbol is encountered for the first time in an assembly program, the assembler
+			allocates a new RAM address to it, starting at address 16. This convention can be exploited to represent each static variable number j in a VM file f as the
+			assembly language symbol f.j.For example, suppose that the file Xxx.vm contains the command push static 3. This command can be translated to the Hack
+			assembly commands@Xxx.3 and D = M, followed by additional assembly code that pushes D’s value to the stack.This implementation of the static segment is
+			somewhat tricky, but it works.*/
+
+			//store popped stack variable in D
+			ss << "@SP" << std::endl;
+			ss << "AM = M - 1" << std::endl;
+			ss << "D = M" << std::endl;
+
+			//store D at the static whatever
+			ss << "@" + filename + "." + arg2 << std::endl;
+			ss << "M = D" << std::endl;
+		}
 	}
 
 }

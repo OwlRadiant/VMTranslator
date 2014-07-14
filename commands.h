@@ -3,6 +3,9 @@
 #include <string>
 #include <sstream>
 
+//global variable for the filename, useful to the static segment
+extern std::string filename;
+
 //Translates the passed VM command into corresponding .hack instructions
 void math_command(std::string command, std::stringstream& ss);
 

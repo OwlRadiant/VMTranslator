@@ -6,8 +6,11 @@
 #include <vector>
 #include "VM_parser.h"
 #include <fstream>
+#include "commands.h"
 using namespace std;
 
+//global variable with filename for the static memory segment
+std::string filename;
 
 int main(int argc, char** argv){
 	//check given parameter; if file check for extension and parse it; if folder open folder and check individual files for extension, then parse them all into one .asm file
@@ -19,6 +22,7 @@ int main(int argc, char** argv){
 
 	if (is_file(argv[1])){
 		if (getFileExtension(argv[1]) == "vm"){
+			filename = getFileName(argv[1]);
 			parse_file((string)argv[1], ss);
 		}
 		else {
@@ -33,7 +37,7 @@ int main(int argc, char** argv){
 		while (getline(ss, line)){
 			output_file << line << endl;
 		}
-		output_file << "(ENDINGLOOP)" << endl;
+		output_file << endl << "(ENDINGLOOP)" << endl;
 		output_file << "@ENDINGLOOP" << endl;
 		output_file << "0;JMP" << endl;
 		output_file.close();
@@ -51,6 +55,7 @@ int main(int argc, char** argv){
 
 		for (unsigned int i = 0; i < files.size(); i++){
 			if (getFileExtension(files[i].c_str()) == ".vm"){
+				filename = files[i];
 				parse_file((string)argv[1] + "/" + files[i], ss);
 			}
 			
