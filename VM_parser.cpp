@@ -6,8 +6,8 @@
 #include "commands.h"
 const std::vector<std::string> math = { "add", "sub", "neg", "eq", "gt", "lt", "and", "or", "not" };
 const std::vector<std::string> mem_access = { "push", "pop" };
-const std::vector<std::string> prog_flow = {};
-const std::vector<std::string> func_calling = {};
+const std::vector<std::string> prog_flow = {"label", "goto", "if-goto"};
+const std::vector<std::string> func_calling = {"function", "call", "return"};
 
 //this function takes each line and outputs to stringstream the equivalent .asm lines
 void parse_line(std::string line, std::stringstream& ss){

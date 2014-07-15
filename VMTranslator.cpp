@@ -19,6 +19,8 @@ int main(int argc, char** argv){
 		return -1;
 	}
 	stringstream ss;
+	string line;
+	ofstream output_file;
 
 	if (is_file(argv[1])){
 		if (getFileExtension(argv[1]) == "vm"){
@@ -31,9 +33,11 @@ int main(int argc, char** argv){
 			return -2;
 		}
 
-		ofstream output_file;
 		output_file.open(getFileName(argv[1]) + ".asm");
-		string line;
+
+		//program initialization code, SP = 256, call Sys.init
+		//bootstrap_code_init(ss);
+
 		while (getline(ss, line)){
 			output_file << line << endl;
 		}
@@ -53,13 +57,28 @@ int main(int argc, char** argv){
 			files.push_back(pent->d_name);
 		}
 
+		//program initialization code, SP = 256, call Sys.init
+		bootstrap_code_init(ss);
+
 		for (unsigned int i = 0; i < files.size(); i++){
-			if (getFileExtension(files[i].c_str()) == ".vm"){
+			if (getFileExtension(files[i].c_str()) == "vm"){
 				filename = files[i];
 				parse_file((string)argv[1] + "/" + files[i], ss);
 			}
 			
 		}
+
+		output_file.open((string)argv[1] + "/" +argv[1] + ".asm");
+
+		
+
+		while (getline(ss, line)){
+			output_file << line << endl;
+		}
+		output_file << endl << "(ENDINGLOOP)" << endl;
+		output_file << "@ENDINGLOOP" << endl;
+		output_file << "0;JMP" << endl;
+		output_file.close();
 	}
 
 	else {

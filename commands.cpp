@@ -3,10 +3,23 @@
 #include <sstream>
 #include "commands.h"
 
+static int salt = 0;
+static std::string function_name = "empty";
+
+//program initialization code, SP = 256, call (!!!!!!!!!!FUCKING VM CALL NOT JMP) Sys.init
+void bootstrap_code_init(std::stringstream& ss){
+	ss << "//Init bootstrap code" << std::endl;
+	ss << "@256" << std::endl;
+	ss << "D = A" << std::endl;
+	ss << "@SP" << std::endl;
+	ss << "M = D" << std::endl;
+
+	func_calling_command("call", "Sys.init", "0", ss);
+}
 
 void math_command(std::string command, std::stringstream& ss){
 	//use a salt when creating any label in a function to make it unique to that function
-	static int salt = 0;
+	
 
 	//result = x + y;
 	if (command == "add"){
@@ -605,18 +618,199 @@ void mem_access_command(std::string command, std::string arg1, std::string arg2,
 
 
 void prog_flow_command(std::string command, std::string arg1, std::stringstream& ss){
+	if (command == "label"){
+		ss << std::endl;
+		ss << "(" + function_name +"$" + arg1 + ")" << std::endl;
+	}
+	else if (command == "goto"){
+		ss << "@" + function_name + "$" + arg1 << std::endl;
+		ss << "0; JMP" << std::endl;
+	}
+	else if (command == "if-goto"){
+		ss << std::endl << "//if-goto " << arg1 << std::endl;
+		//pop stack value
+		ss << "@SP" << std::endl;
+		ss << "AM = M - 1" << std::endl;
+		ss << "D = M" << std::endl;
 
-
-
+		//if D == 0 ignore jump; else if D != 0 jump to "label" 
+		ss << "@" + function_name + "$" + arg1 << std::endl;
+		ss << "D; JNE" << std::endl;
+		
+	}
 
 }
 
 
 
 void func_calling_command(std::string command, std::string arg1, std::string arg2, std::stringstream& ss){
+	if (command == "function"){
+		//sets the function name for any labels that are generated while in the function
+		function_name = arg1;
 
+		ss << std::endl << "//function " + arg1 << std::endl;
+		ss << "("  + arg1 + ")" << std::endl;
+		for (int i = 0; i < std::stoi(arg2); i++){
+			ss << "@0" << std::endl;
+			ss << "D = A" << std::endl;
+			ss << "@SP" << std::endl;
+			ss << "A = M" << std::endl;
+			ss << "M = D" << std::endl;
+			ss << "@SP" << std::endl;
+			ss << "M = M + 1" << std::endl;
+		}
+	}
+	else if (command == "call"){
+		//calling function after "arg2" arguments have been pushed on the stack
+		ss << std::endl << "//call " + arg1 + " " + arg2<< std::endl;
 
+		//push return address to stack
+		ss << "@RETURN_ADDRESS_" + arg1 + "_" + std::to_string(salt) << std::endl;
+		ss << "D = A" << std::endl;
+		ss << "@SP" << std::endl;
+		ss << "A = M" << std::endl;
+		ss << "M = D" << std::endl;
+		ss << "@SP" << std::endl;
+		ss << "M = M + 1" << std::endl;
+		
+		//push LCL
+		ss << "@LCL" << std::endl;
+		ss << "D = M" << std::endl;
+		ss << "@SP" << std::endl;
+		ss << "A = M" << std::endl;
+		ss << "M = D" << std::endl;
+		ss << "@SP" << std::endl;
+		ss << "M = M + 1" << std::endl;
 
+		//push ARG
+		ss << "@ARG" << std::endl;
+		ss << "D = M" << std::endl;
+		ss << "@SP" << std::endl;
+		ss << "A = M" << std::endl;
+		ss << "M = D" << std::endl;
+		ss << "@SP" << std::endl;
+		ss << "M = M + 1" << std::endl;
+
+		//push THIS
+		ss << "@THIS" << std::endl;
+		ss << "D = M" << std::endl;
+		ss << "@SP" << std::endl;
+		ss << "A = M" << std::endl;
+		ss << "M = D" << std::endl;
+		ss << "@SP" << std::endl;
+		ss << "M = M + 1" << std::endl;
+
+		//push THAT
+		ss << "@THAT" << std::endl;
+		ss << "D = M" << std::endl;
+		ss << "@SP" << std::endl;
+		ss << "A = M" << std::endl;
+		ss << "M = D" << std::endl;
+		ss << "@SP" << std::endl;
+		ss << "M = M + 1" << std::endl;
+
+		//ARG = SP-n-5 ( n = number of arguments)
+		ss << "@SP" << std::endl;
+		ss << "D = M" << std::endl;
+		ss << "@" + arg2 << std::endl;
+		ss << "D = D - A" << std::endl;
+		ss << "@5" << std::endl;
+		ss << "D = D - A" << std::endl;
+		ss << "@ARG" << std::endl;
+		ss << "M = D" << std::endl;
+
+		//LCL = SP
+		ss << "@SP" << std::endl;
+		ss << "D = M" << std::endl;
+		ss << "@LCL" << std::endl;
+		ss << "M = D" << std::endl;
+		
+
+		//goto f (arg1)
+		ss << "@" + arg1 << std::endl;
+		ss << "0; JMP" << std::endl;
+		
+		//(return-address)
+		ss << "(RETURN_ADDRESS_" + arg1 + "_" + std::to_string(salt) + ")" << std::endl;
+
+		//needed for the unique label ID of the return address
+		salt++;
+
+	}
+	else if (command == "return"){
+
+		//returns program execution back to return-address with the computed value on the top of the stack
+		ss << std::endl << "//return " << std::endl;
+
+		//ss << std::endl << "//FRAME = LCL (just store LCL anywhere, R13 here)" << std::endl;
+		ss << "@LCL" << std::endl;
+		ss << "D = M" << std::endl;
+		ss << "@R13" << std::endl;
+		ss << "M = D" << std::endl;
+
+		//ss << std::endl << "//RET = *(FRAME - 5)  store return address somewhere (R14 here)" << std::endl;
+		ss << "@R13" << std::endl;
+		ss << "D = M" << std::endl;
+		ss << "@5" << std::endl;
+		ss << "A = D - A" << std::endl;
+		ss << "D = M" << std::endl;
+		ss << "@R14" << std::endl;
+		ss << "M = D" << std::endl;
+
+		//ss << std::endl << "//*ARG = pop()    pop the LOCAL/CURRENT stack into *ARG 0, which will be the top of the global stack(by global I mean at the scope of the caller function) when function returns " << std::endl;
+		ss << "@SP" << std::endl;
+		ss << "AM = M - 1" << std::endl;
+		ss << "D = M" << std::endl;
+		ss << "@ARG" << std::endl;
+		ss << "A = M" << std::endl;
+		ss << "M = D" << std::endl;
+
+		//ss << std::endl << "//SP = ARG + 1    move stack pointer back to the top of the caller function's stack" << std::endl;
+		ss << "@ARG" << std::endl;
+		ss << "D = M + 1" << std::endl;
+		ss << "@SP" << std::endl;
+		ss << "M = D" << std::endl;
+		
+		//move back all the registers as they were before the call
+		//ss << std::endl << "//THAT = *(FRAME - 1)" << std::endl;
+		ss << "@R13" << std::endl;
+		ss << "A = M - 1" << std::endl;
+		ss << "D = M" << std::endl;
+		ss << "@THAT" << std::endl;
+		ss << "M = D" << std::endl;
+
+		//ss << std::endl << "//THIS = *(FRAME - 2)" << std::endl;
+		ss << "@R13" << std::endl;
+		ss << "D = M" << std::endl;
+		ss << "@2" << std::endl;
+		ss << "A = D - A" << std::endl;
+		ss << "D = M" << std::endl;
+		ss << "@THIS" << std::endl;
+		ss << "M = D" << std::endl;
+
+		//ss << std::endl << "//ARG = *(FRAME - 3)" << std::endl;
+		ss << "@R13" << std::endl;
+		ss << "D = M" << std::endl;
+		ss << "@3" << std::endl;
+		ss << "A = D - A" << std::endl;
+		ss << "D = M" << std::endl;
+		ss << "@ARG" << std::endl;
+		ss << "M = D" << std::endl;
+
+		//ss << std::endl << "//LCL = *(FRAME - 4)" << std::endl;
+		ss << "@R13" << std::endl;
+		ss << "D = M" << std::endl;
+		ss << "@4" << std::endl;
+		ss << "A = D - A" << std::endl;
+		ss << "D = M" << std::endl;
+		ss << "@LCL" << std::endl;
+		ss << "M = D" << std::endl;
+
+		//ss << std::endl << "//goto RET (stored previously in R14)" << std::endl;
+		ss << "@R14" << std::endl;
+		ss << "A = M" << std::endl;
+		ss << "0; JMP" << std::endl;
+	}
 
 
 }

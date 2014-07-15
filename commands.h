@@ -6,6 +6,9 @@
 //global variable for the filename, useful to the static segment
 extern std::string filename;
 
+//program initialization code, SP = 256, call Sys.init
+void bootstrap_code_init(std::stringstream& ss);
+
 //Translates the passed VM command into corresponding .hack instructions
 void math_command(std::string command, std::stringstream& ss);
 
