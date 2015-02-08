@@ -400,13 +400,19 @@ void mem_access_command(std::string command, std::string arg1, std::string arg2,
 		else if (arg1 == "static"){
 			ss << std::endl << "//push static " << arg2 << std::endl;
 
-			//This is a trickier part, I get how it's implemented but I have no seen static used yet; will come back to this to understand better
-			//Apparently static is used like a variable available to the whole file;
-				/*static: According to the Hack machine language specification, when a new symbol is encountered for the first time in an assembly program, the assembler
-				allocates a new RAM address to it, starting at address 16. This convention can be exploited to represent each static variable number j in a VM file f as the
-				assembly language symbol f.j.For example, suppose that the file Xxx.vm contains the command push static 3. This command can be translated to the Hack
-				assembly commands@Xxx.3 and D = M, followed by additional assembly code that pushes D’s value to the stack.This implementation of the static segment is
-				somewhat tricky, but it works.*/
+			// This is a trickier part, I get how it's implemented but I have not seen
+			// static used yet; will come back to this to understand better Apparently
+			// static is used like a variable available to the whole file;
+
+			/* static: According to the Hack machine language specification, when a new
+			symbol is encountered for the first time in an assembly program, the assembler
+			allocates a new RAM address to it, starting at address 16. This convention can
+			be exploited to represent each static variable number j in a VM file f as the
+			assembly language symbol f.j.For example, suppose that the file Xxx.vm contains
+			the command push static 3. This command can be translated to the Hack assembly
+			commands@Xxx.3 and D = M, followed by additional assembly code that pushes D's
+			value to the stack.This implementation of the static segment is somewhat tricky,
+			but it works. */
 
 			//Get variable stored at that static address
 			ss << "@" + filename + "." + arg2 << std::endl;
@@ -594,13 +600,20 @@ void mem_access_command(std::string command, std::string arg1, std::string arg2,
 		}
 		else if (arg1 == "static"){
 			ss << std::endl << "//pop static " << arg2 << std::endl;
-			//This is a trickier part, I get how it's implemented but I have no seen static used yet; will come back to this to understand better
-			//Apparently static is used like a variable available to the whole file;
-			/*static: According to the Hack machine language specification, when a new symbol is encountered for the first time in an assembly program, the assembler
-			allocates a new RAM address to it, starting at address 16. This convention can be exploited to represent each static variable number j in a VM file f as the
-			assembly language symbol f.j.For example, suppose that the file Xxx.vm contains the command push static 3. This command can be translated to the Hack
-			assembly commands@Xxx.3 and D = M, followed by additional assembly code that pushes D’s value to the stack.This implementation of the static segment is
-			somewhat tricky, but it works.*/
+
+			// This is a trickier part, I get how it's implemented but I have not seen
+			// static used yet; will come back to this to understand better Apparently
+			// static is used like a variable available to the whole file;
+
+			/* static: According to the Hack machine language specification, when a new
+			symbol is encountered for the first time in an assembly program, the assembler
+			allocates a new RAM address to it, starting at address 16. This convention can
+			be exploited to represent each static variable number j in a VM file f as the
+			assembly language symbol f.j.For example, suppose that the file Xxx.vm contains
+			the command push static 3. This command can be translated to the Hack assembly
+			commands@Xxx.3 and D = M, followed by additional assembly code that pushes D'
+			value to the stack.This implementation of the static segment is somewhat tricky,
+			but it works. */
 
 			//store popped stack variable in D
 			ss << "@SP" << std::endl;
